@@ -5,7 +5,7 @@ import Login from './Login';
 describe('Login', () => {
   it('shows a validation error when submitted empty', () => {
     render(<Login onLogin={() => {}} onSwitch={() => {}} />);
-    fireEvent.click(screen.getByText('Log in'));
+    fireEvent.click(screen.getByRole('button', { name: 'Log in' }));
     expect(screen.getByRole('alert')).toHaveTextContent('Email and password are required');
   });
 
