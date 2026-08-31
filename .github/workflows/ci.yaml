@@ -2,22 +2,49 @@ name: CI
 
 on:
     workflow_dispatch:
-    push:
-        branches: [ main ]
+    #=======================
+    # NOT Needed to run the checks and security scan again if the branch
+    # protection is already well configured and need required checks before merge to main
+    # push:
+    #     branches: [ main ]
     pull_request:
         branches: [ main ]
 
 jobs:
-    test:
-        name: Test
+    detect-change:
+        name: Identify changed service
         runs-on: ubuntu-22.04
-        #===================
-        # TODO: Optimize the matrix strategy to run job only for changed service
-        #===================
+        permissions:
+            pull-requests: read
+        outputs:
+            changed-services: ${{ steps.filter.outputs.changes }}
+        # Outputs the JSON array of names of filters defined (essentially changed services)
+        steps:
+        -   name: Checkout
+            uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
+
+        -   name: Detect changed service
+            uses: dorny/paths-filter@9d7afb8d214ad99e78fbd4247752c4caed2b6e4c #v4.0.0
+            id: filter
+            with:
+                filters: |
+                    frontend:
+                    - 'frontend/**'
+                    - '!frontend/**/Dockerfile'
+
+                    backend:
+                    - 'backend/**'
+                    - '!backend/**/Dockerfile'
+
+    test:
+        name: Test and Validate
+        needs: detect-change
+        runs-on: ubuntu-22.04
+        if: ${{ needs.detect-change.outputs.changed-services!='[]'&& needs.detect-change.outputs.changed-services!='' }}
         strategy:
             fail-fast: false
             matrix:
-                service: [frontend, backend]
+                service: ${{ fromJson(needs.detect-change.outputs.changed-services) }}
         steps:
         -   name: Checkout
             uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
@@ -30,7 +57,7 @@ jobs:
                 node-version: '20'
                 cache: 'npm'
                 cache-dependency-path: '${{ matrix.service }}/package-lock.json'
-        # Setup Node action automatically uses actions/setup-cache so, no need to use
+        # Setup-Node action automatically uses actions/setup-cache so, no need to use
         # separate step to cache the deps
         
         -   name: Install dependencies

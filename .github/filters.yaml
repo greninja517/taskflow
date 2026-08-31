@@ -1,0 +1,7 @@
+frontend:
+  - 'frontend/**'
+  - '!frontend/**/Dockerfile'
+
+backend:
+  - 'backend/**'
+  - '!backend/**/Dockerfile'
