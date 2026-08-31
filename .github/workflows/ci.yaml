@@ -27,14 +27,7 @@ jobs:
             uses: dorny/paths-filter@9d7afb8d214ad99e78fbd4247752c4caed2b6e4c #v4.0.0
             id: filter
             with:
-                filters: |
-                    frontend:
-                    - 'frontend/**'
-                    - '!frontend/**/Dockerfile'
-
-                    backend:
-                    - 'backend/**'
-                    - '!backend/**/Dockerfile'
+                filters: .github/filters.yaml
 
     test:
         name: Test and Validate
