@@ -1,0 +1,23 @@
+name: 'Dependency Review'
+
+on:
+    workflow_dispatch: 
+    # For Testing Only
+    pull_request: 
+        branches: [ main ]
+
+jobs:
+    dependency-review:
+        name: Dependency Review
+        runs-on: ubuntu-22.04
+        steps:
+        -   name: Checkout
+            uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
+        
+        # Can use any SCA scanner to catch dependency vulnerabilities
+        -   name: Scan the Dependencies
+            uses: actions/dependency-review-action@v5
+            with:
+                fail-on-severity: high
+
+
