@@ -1,0 +1,40 @@
+name: Security Analysis
+
+on:
+    # Push to main not needed. Enable depanadabot alerts for continuous scanning of
+    # vulnerable deps. This workflow is only for gatekeeping PRs, so that any PR
+    # doesn't introduce any vulnerable deps or secrets.
+    pull_request:
+        branches: [main]
+
+jobs:
+    security-analysis:
+        name: Security Checks
+        runs-on: ubuntu-22.04
+        permissions:
+            contents: read
+            pull-requests: write
+
+        steps:
+        -   name: Checkout 
+            uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
+            with:
+                fetch-depth: 0
+
+        -   name: Scan Sensitive Data/Secrets
+            uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e #v3.0.0
+            env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+        -   name: Trivy SCA Analysis (Dependency Vulnerabilites)
+            uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 #v0.36.0
+            with:
+                scan-type: 'fs'
+                vuln-type: 'library'
+                format: 'table'
+                severity: 'HIGH,CRITICAL'
+                exit-code: 1
+
+
+        # -   name: Code Quality Analysis (SAST)
+        # TODO

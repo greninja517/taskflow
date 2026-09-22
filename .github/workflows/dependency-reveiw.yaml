@@ -15,6 +15,8 @@ jobs:
             uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
         
         # Can use any SCA scanner to catch dependency vulnerabilities
+        # This GitHub's own dependency review action only checks the new dependencies
+        # introduced by that PR, not the ones that are already present in the base branch
         -   name: Scan the Dependencies
             uses: actions/dependency-review-action@v5
             with:
